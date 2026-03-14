@@ -109,10 +109,11 @@ router.get('/:id', (req, res) => {
   const caseData = mockCases.find(c => c.id === id);
   
   if (!caseData) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: { code: 'CASE_NOT_FOUND', message: '病例不存在' },
     });
+    return;
   }
   
   res.json({

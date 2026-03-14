@@ -41,10 +41,11 @@ router.get('/:id', (req, res) => {
   const interview = interviews.get(id);
   
   if (!interview) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: { code: 'INTERVIEW_NOT_FOUND', message: '问诊不存在' },
     });
+    return;
   }
   
   res.json({
@@ -60,10 +61,11 @@ router.post('/:id/messages', (req, res) => {
   
   const interview = interviews.get(id);
   if (!interview) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: { code: 'INTERVIEW_NOT_FOUND', message: '问诊不存在' },
     });
+    return;
   }
   
   // 添加用户消息
@@ -107,10 +109,11 @@ router.post('/:id/diagnosis', (req, res) => {
   
   const interview = interviews.get(id);
   if (!interview) {
-    return res.status(404).json({
+    res.status(404).json({
       success: false,
       error: { code: 'INTERVIEW_NOT_FOUND', message: '问诊不存在' },
     });
+    return;
   }
   
   interview.status = 'COMPLETED';

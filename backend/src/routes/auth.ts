@@ -6,13 +6,13 @@ const router = Router();
 
 // 演示登录
 router.post('/login', (req, res) => {
-  const { email, password } = req.body;
+  const { email } = req.body;
   
   // 演示模式：任何账号都可以登录
   const token = jwt.sign(
     { userId: 'demo-user', email: email || 'demo@medcase.ai', role: 'STUDENT' },
-    config.jwt.secret,
-    { expiresIn: config.jwt.expiresIn }
+    config.jwt.secret as jwt.Secret,
+    { expiresIn: config.jwt.expiresIn as jwt.SignOptions['expiresIn'] }
   );
   
   res.json({
@@ -30,7 +30,7 @@ router.post('/login', (req, res) => {
 });
 
 // 获取当前用户
-router.get('/me', (req, res) => {
+router.get('/me', (_req, res) => {
   res.json({
     success: true,
     data: {
