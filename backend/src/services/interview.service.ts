@@ -46,7 +46,7 @@ export class InterviewService {
         studentId,
         mode,
         status: 'IN_PROGRESS',
-        messages: JSON.stringify([{
+        dialogue: JSON.stringify([{
           id: `msg-${Date.now()}`,
           role: 'patient',
           content: this.generatePatientGreeting(caseData),
@@ -126,8 +126,7 @@ export class InterviewService {
     await prisma.interview.update({
       where: { id: interviewId },
       data: {
-        messages: JSON.stringify(updatedMessages),
-        updatedAt: new Date(),
+        dialogue: JSON.stringify(updatedMessages),
       },
     });
 
@@ -185,8 +184,7 @@ export class InterviewService {
         await prisma.interview.update({
           where: { id: interviewId },
           data: {
-            messages: JSON.stringify([...updatedMessages, aiMessage]),
-            updatedAt: new Date(),
+            dialogue: JSON.stringify([...updatedMessages, aiMessage]),
           },
         });
 
@@ -267,7 +265,6 @@ export class InterviewService {
           suggestions: JSON.stringify(this.generateSuggestions(interview, scores)),
           duration,
           completedAt: new Date(),
-          updatedAt: new Date(),
         },
       });
 
@@ -347,7 +344,7 @@ export class InterviewService {
    */
   private calculateCompleteness(
     userMessages: InterviewMessage[],
-    caseData: any
+    _caseData: any
   ): number {
     const content = userMessages.map(m => m.content).join('');
     
@@ -397,10 +394,10 @@ export class InterviewService {
       c.includes('什么') || c.includes('怎么') || c.includes('哪些')
     ).length;
     
-    // 检查封闭式提问
-    const closeQuestions = contents.filter(c =>
-      c.includes('吗') || c.includes('是不是') || c.includes('有没有')
-    ).length;
+    // 检查封闭式提问（预留）
+    // const closeQuestions = contents.filter(c =>
+    //   c.includes('吗') || c.includes('是不是') || c.includes('有没有')
+    // ).length;
     
     // 开放式提问比例越高越好
     const total = contents.length;
@@ -437,7 +434,7 @@ export class InterviewService {
   /**
    * 计算效率
    */
-  private calculateEfficiency(duration: number, messageCount: number): number {
+  private calculateEfficiency(duration: number, _messageCount: number): number {
     // 理想时长：10-15分钟
     const idealMin = 600; // 10分钟
     const idealMax = 900; // 15分钟
@@ -476,7 +473,7 @@ export class InterviewService {
    * 生成改进建议
    */
   private generateSuggestions(
-    interview: any,
+    _interview: any,
     scores: InterviewScores
   ): string[] {
     const suggestions: string[] = [];

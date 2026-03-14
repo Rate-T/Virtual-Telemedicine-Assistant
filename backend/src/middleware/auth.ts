@@ -88,7 +88,7 @@ export const authenticate = (
  * 角色权限检查中间件
  */
 export const requireRole = (roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     if (!req.user) {
       next(new AppError(
         ErrorCodes.UNAUTHORIZED,
