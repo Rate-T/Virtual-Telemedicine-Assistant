@@ -73,7 +73,7 @@ const InterviewChat: React.FC = () => {
 
   // 发送消息
   const handleSend = async () => {
-    if (!inputValue.trim() || status === 'chatting') return;
+    if (!inputValue.trim()) return;
     
     const message = inputValue.trim();
     setInputValue('');
