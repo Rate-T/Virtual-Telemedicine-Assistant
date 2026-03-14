@@ -6,9 +6,9 @@ import {
   InterviewScores,
   AppError,
   ErrorCodes 
-} from '@/types';
+} from './types';
 import { aiService } from './ai.service';
-import { logger } from '@/utils/logger';
+import { logger } from './utils/logger';
 
 const prisma = new PrismaClient();
 

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import config from '@/config';
-import { JWTPayload, AppError, ErrorCodes } from '@/types';
+import config from './config';
+import { JWTPayload, AppError, ErrorCodes } from './types';
 
 // 扩展Express Request类型
 declare global {

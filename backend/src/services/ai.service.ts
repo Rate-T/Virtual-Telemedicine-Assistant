@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import { logger, aiLogger } from '@/utils/logger';
-import config from '@/config';
-import { InterviewMessage, AIChatStreamResponse } from '@/types';
+import { logger, aiLogger } from './utils/logger';
+import config from './config';
+import { InterviewMessage, AIChatStreamResponse } from './types';
 
 /**
  * AI服务封装
