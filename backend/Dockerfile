@@ -18,5 +18,5 @@ RUN mkdir -p logs
 # 暴露端口
 EXPOSE 3000
 
-# 启动命令（先尝试迁移，失败也继续启动）
-CMD ["sh", "-c", "npx prisma migrate deploy || true && node dist/index.js"]
+# 启动命令
+CMD ["node", "dist/index.js"]
