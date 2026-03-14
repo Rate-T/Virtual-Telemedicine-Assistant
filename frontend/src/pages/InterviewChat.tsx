@@ -301,3 +301,53 @@ const InterviewChat: React.FC = () => {
             placeholder="请输入您的问题..."
             autoSize={{ minRows: 1, maxRows: 4 }}
             onPressEnter={(e) => {
+              if (!e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+          />
+          <Button 
+            type="primary"
+            icon={<SendOutlined />}
+            onClick={handleSend}
+            disabled={status === 'chatting' || !inputValue.trim()}
+          >
+            发送
+          </Button>
+        </Space.Compact>
+      </Card>
+
+      {/* 诊断弹窗 */}
+      <Modal
+        title="提交诊断"
+        open={diagnosisModalVisible}
+        onCancel={() => setDiagnosisModalVisible(false)}
+        footer={null}
+      >
+        <Form form={diagnosisForm} onFinish={handleSubmitDiagnosis} layout="vertical">
+          <Form.Item
+            name="diagnosis"
+            label="诊断结果"
+            rules={[{ required: true, message: '请输入诊断结果' }]}
+          >
+            <TextArea rows={3} placeholder="请输入您的诊断..." />
+          </Form.Item>
+          <Form.Item
+            name="diagnosisBasis"
+            label="诊断依据"
+          >
+            <TextArea rows={3} placeholder="请说明诊断依据..." />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block>
+              提交
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+};
+
+export default InterviewChat;
