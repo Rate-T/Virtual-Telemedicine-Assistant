@@ -311,7 +311,7 @@ const InterviewChat: React.FC = () => {
             type="primary"
             icon={<SendOutlined />}
             onClick={handleSend}
-            disabled={status === 'chatting' || !inputValue.trim()}
+            disabled={!inputValue.trim()}
           >
             发送
           </Button>
