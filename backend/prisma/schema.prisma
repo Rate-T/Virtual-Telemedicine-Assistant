@@ -1,0 +1,220 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// 用户表
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      UserRole @default(STUDENT)
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  classes       Class[]       @relation("TeacherClasses")
+  classMembers  ClassMember[]
+  interviews    Interview[]
+  caseFavorites CaseFavorite[]
+  createdCases  Case[]        @relation("CaseCreator")
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+// 班级表
+model Class {
+  id        String   @id @default(uuid())
+  name      String
+  grade     String
+  course    String
+  inviteCode String  @unique
+  teacherId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 关联
+  teacher  User          @relation("TeacherClasses", fields: [teacherId], references: [id])
+  members  ClassMember[]
+  homework Homework[]
+
+  @@map("classes")
+}
+
+// 班级成员表
+model ClassMember {
+  id      String @id @default(uuid())
+  classId String
+  userId  String
+  joinedAt DateTime @default(now())
+
+  // 关联
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([classId, userId])
+  @@map("class_members")
+}
+
+// 病例表
+model Case {
+  id                String   @id @default(uuid())
+  title             String
+  chiefComplaint    String   @db.Text
+  presentIllness    String   @db.Text
+  pastHistory       String?  @db.Text
+  personalHistory   String?  @db.Text
+  familyHistory     String?  @db.Text
+  physicalExam      String?  @db.Text
+  auxiliaryExam     String?  @db.Text
+  diagnosis         String
+  icd10Code         String?
+  department        String
+  difficulty        Int      @default(3) // 1-5
+  caseType          CaseType @default(COMMON)
+  keywords          String?  // JSON array
+  suitableGrade     String?
+  teachingPoints    String?  @db.Text
+  commonMistakes    String?  @db.Text
+  expectedDuration  Int?     // 预计问诊时长（分钟）
+  status            CaseStatus @default(DRAFT)
+  createdBy         String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // 关联
+  creator    User          @relation("CaseCreator", fields: [createdBy], references: [id])
+  favorites  CaseFavorite[]
+  interviews Interview[]
+  homework   HomeworkCase[]
+
+  @@map("cases")
+}
+
+enum CaseType {
+  COMMON      // 常见病
+  RARE        // 罕见病
+  EMERGENCY   // 急诊
+  CHRONIC     // 慢性病
+}
+
+enum CaseStatus {
+  DRAFT       // 草稿
+  PUBLISHED   // 已发布
+  ARCHIVED    // 已下架
+}
+
+// 病例收藏表
+model CaseFavorite {
+  id     String @id @default(uuid())
+  caseId String
+  userId String
+  createdAt DateTime @default(now())
+
+  // 关联
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([caseId, userId])
+  @@map("case_favorites")
+}
+
+// 问诊记录表
+model Interview {
+  id                     String        @id @default(uuid())
+  caseId                 String
+  studentId              String
+  mode                   InterviewMode @default(FREE)
+  status                 InterviewStatus @default(IN_PROGRESS)
+  dialogue               String?       @db.LongText // JSON array of messages
+  diagnosis              String?
+  diagnosisBasis         String?       @db.Text
+  differentialDiagnosis  String?       @db.Text
+  treatmentSuggestion    String?       @db.Text
+  scores                 String?       // JSON object
+  feedback               String?       @db.Text
+  suggestions            String?       // JSON array
+  duration               Int?          // 秒
+  startedAt              DateTime      @default(now())
+  completedAt            DateTime?
+
+  // 关联
+  case    Case @relation(fields: [caseId], references: [id])
+  student User @relation(fields: [studentId], references: [id])
+
+  @@map("interviews")
+}
+
+enum InterviewMode {
+  FREE    // 自由问诊
+  GUIDE   // 引导模式
+  EXAM    // 考核模式
+}
+
+enum InterviewStatus {
+  IN_PROGRESS // 进行中
+  COMPLETED   // 已完成
+  ABANDONED   // 已放弃
+}
+
+// 作业表
+model Homework {
+  id          String       @id @default(uuid())
+  classId     String
+  title       String
+  description String?      @db.Text
+  type        HomeworkType @default(ASSIGNED)
+  deadline    DateTime?
+  allowRetry  Boolean      @default(true)
+  maxAttempts Int?         @default(3)
+  status      HomeworkStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // 关联
+  class  Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  cases  HomeworkCase[]
+
+  @@map("homework")
+}
+
+enum HomeworkType {
+  ASSIGNED    // 指定病例
+  OPTIONAL    // 自选病例
+  EXAM        // 考核任务
+}
+
+enum HomeworkStatus {
+  ACTIVE      // 进行中
+  CLOSED      // 已截止
+  ARCHIVED    // 已归档
+}
+
+// 作业-病例关联表
+model HomeworkCase {
+  id         String @id @default(uuid())
+  homeworkId String
+  caseId     String
+
+  // 关联
+  homework Homework @relation(fields: [homeworkId], references: [id], onDelete: Cascade)
+  case     Case     @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@unique([homeworkId, caseId])
+  @@map("homework_cases")
+}
