@@ -18,7 +18,9 @@ interface AIRequestConfig {
   retryDelay: number;
 }
 
-interface AIResponse {
+// AI响应类型（预留扩展）
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+interface _AIResponse {
   content: string;
   metadata: {
     promptTokens: number;

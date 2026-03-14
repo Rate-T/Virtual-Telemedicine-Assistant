@@ -18,7 +18,7 @@ declare global {
  */
 export const authenticate = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
   try {
@@ -116,7 +116,7 @@ export const requireRole = (roles: string[]) => {
  */
 export const optionalAuth = (
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction
 ): void => {
   try {

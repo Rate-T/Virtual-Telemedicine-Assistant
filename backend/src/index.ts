@@ -29,7 +29,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use('/api/health', healthRouter);
 
 // 根路由
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({
     service: 'MedCase AI Backend',
     version: '1.0.0',
@@ -38,7 +38,7 @@ app.get('/', (req, res) => {
 });
 
 // 404处理
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({
     success: false,
     error: {
@@ -49,7 +49,7 @@ app.use((req, res) => {
 });
 
 // 错误处理
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   logger.error('Unhandled error', { error: err.message, stack: err.stack });
   res.status(500).json({
     success: false,
