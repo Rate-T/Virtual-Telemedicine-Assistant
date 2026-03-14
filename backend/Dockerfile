@@ -4,13 +4,13 @@ WORKDIR /app
 
 # 安装依赖
 COPY package*.json ./
-RUN npm install --omit=dev
+RUN npm install
 
 # 复制代码
 COPY . .
 
-# 生成Prisma客户端
-RUN npx prisma generate
+# 生成Prisma客户端并编译TypeScript
+RUN npx prisma generate && npm run build
 
 # 创建日志目录
 RUN mkdir -p logs
@@ -19,4 +19,4 @@ RUN mkdir -p logs
 EXPOSE 3000
 
 # 启动命令
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/index.js"]
