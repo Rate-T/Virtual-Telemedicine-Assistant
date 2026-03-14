@@ -6,6 +6,11 @@ import config from './config';
 import { logger } from './utils/logger';
 import healthRouter from './routes/health';
 
+// 导入路由
+import authRouter from './routes/auth';
+import caseRouter from './routes/case';
+import interviewRouter from './routes/interview';
+
 const app = express();
 
 // 安全中间件
@@ -27,6 +32,11 @@ app.use(express.json({ limit: '10mb' }));
 
 // 健康检查路由
 app.use('/api/health', healthRouter);
+
+// API路由
+app.use('/api/auth', authRouter);
+app.use('/api/cases', caseRouter);
+app.use('/api/interviews', interviewRouter);
 
 // 根路由
 app.get('/', (_req, res) => {
