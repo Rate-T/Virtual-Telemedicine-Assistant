@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { useSettingsStore } from './settingsStore';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://virtual-telemedicine-assistant-production.up.railway.app';
 
@@ -77,7 +78,7 @@ export const useInterviewStore = create<InterviewState & InterviewActions>()(
     },
 
     sendMessage: async (content: string) => {
-      const { interviewId, messages } = get();
+      const { interviewId, messages, caseTitle } = get();
       if (!interviewId) return;
 
       // 添加用户消息
@@ -94,33 +95,82 @@ export const useInterviewStore = create<InterviewState & InterviewActions>()(
       });
 
       try {
+        // 获取AI配置
+        const settings = JSON.parse(localStorage.getItem('medcase-settings') || '{}');
+        const aiConfig = settings?.state?.aiConfig;
+        
+        if (!aiConfig || !aiConfig.apiKey) {
+          // 没有配置，使用模拟回复
+          setTimeout(() => {
+            const mockReplies = [
+              '我胸口疼得厉害，像被石头压着一样...',
+              '大概有两个小时了，一开始只是有点闷。',
+              '我有高血压，平时血压控制得不太好。',
+            ];
+            const reply = mockReplies[Math.floor(Math.random() * mockReplies.length)];
+            
+            set({
+              messages: [...get().messages, {
+                id: `msg-${Date.now()}-patient`,
+                role: 'patient',
+                content: reply,
+                timestamp: Date.now(),
+              }],
+              status: 'chatting',
+            });
+          }, 1000);
+          return;
+        }
+
+        // 调用后端AI接口
         const token = localStorage.getItem('token') || 'demo-token';
-        const response = await fetch(`${API_BASE_URL}/api/interviews/${interviewId}/messages`, {
+        const response = await fetch(`${API_BASE_URL}/api/ai/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({ content }),
+          body: JSON.stringify({
+            config: aiConfig,
+            messages: [
+              {
+                role: 'system',
+                content: `你是一个医学教学用的虚拟患者。你正在扮演一个${caseTitle}的患者。请根据医生的提问，以患者的身份回答。回答要真实、自然，符合病情。`,
+              },
+              ...get().messages.map(m => ({
+                role: m.role === 'user' ? 'user' : 'assistant',
+                content: m.content,
+              })),
+            ],
+          }),
         });
 
         if (!response.ok) {
-          throw new Error('发送消息失败');
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || 'AI调用失败');
         }
 
         const data = await response.json();
         
         set({
           messages: [...get().messages, {
-            id: data.data.message.id,
-            role: data.data.message.role,
-            content: data.data.message.content,
-            timestamp: new Date(data.data.message.timestamp).getTime(),
+            id: `msg-${Date.now()}-patient`,
+            role: 'patient',
+            content: data.data.content,
+            timestamp: Date.now(),
           }],
           status: 'chatting',
         });
       } catch (error) {
-        set({ error: (error as Error).message });
+        set({ 
+          messages: [...get().messages, {
+            id: `msg-${Date.now()}-patient`,
+            role: 'patient',
+            content: `（AI调用失败：${(error as Error).message}。请检查设置中的API配置。）`,
+            timestamp: Date.now(),
+          }],
+          status: 'chatting',
+        });
       }
     },
 
