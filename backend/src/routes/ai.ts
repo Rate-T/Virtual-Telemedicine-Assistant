@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import fetch from 'node-fetch';
 
 const router = Router();
 
@@ -8,14 +7,15 @@ router.post('/chat', async (req, res) => {
   const { messages, config } = req.body;
   
   if (!config || !config.apiUrl || !config.apiKey) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       error: { message: '缺少AI配置，请先在设置中配置API' },
     });
+    return;
   }
 
   try {
-    const response = await fetch(config.apiUrl, {
+    const response = await (globalThis as any).fetch(config.apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
