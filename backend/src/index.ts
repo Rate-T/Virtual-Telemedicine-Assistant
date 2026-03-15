@@ -43,7 +43,7 @@ app.use('/api/cases', caseRouter);
 console.log('Loading interview router...');
 
 // 测试POST端点
-app.post('/api/interviews', (req, res) => {
+app.post('/api/interviews', (_req, res) => {
   console.log('Direct POST /api/interviews hit');
   res.json({ success: true, message: 'POST works' });
 });
