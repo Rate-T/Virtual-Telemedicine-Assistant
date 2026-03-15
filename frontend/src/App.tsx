@@ -1,8 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Layout, Menu, Typography } from 'antd';
-import { MedicineBoxOutlined, FileTextOutlined, UserOutlined } from '@ant-design/icons';
+import { MedicineBoxOutlined, FileTextOutlined, UserOutlined, SettingOutlined } from '@ant-design/icons';
 import InterviewChat from './pages/InterviewChat';
+import Settings from './pages/Settings';
 
 const { Header, Content } = Layout;
 const { Title } = Typography;
@@ -76,6 +77,9 @@ const App: React.FC = () => {
               <Menu.Item key="cases" icon={<FileTextOutlined />}>
                 <Link to="/">病例中心</Link>
               </Menu.Item>
+              <Menu.Item key="settings" icon={<SettingOutlined />}>
+                <Link to="/settings">设置</Link>
+              </Menu.Item>
               <Menu.Item key="profile" icon={<UserOutlined />}>
                 <Link to="/profile">个人中心</Link>
               </Menu.Item>
@@ -87,6 +91,7 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<CaseList />} />
             <Route path="/interview/:caseId" element={<InterviewChat />} />
+            <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<div style={{ padding: 24 }}>个人中心</div>} />
           </Routes>
         </Content>
