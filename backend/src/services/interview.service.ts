@@ -207,7 +207,7 @@ export class InterviewService {
     }
   ): Promise<Interview> {
     // 使用事务确保原子性
-    return await prisma.$transaction(async (tx) => {
+    return await prisma.$transaction(async (tx: any) => {
       // 1. 获取问诊记录（加锁）
       const interview = await tx.interview.findFirst({
         where: {
