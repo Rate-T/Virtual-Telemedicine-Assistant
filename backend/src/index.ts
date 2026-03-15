@@ -75,7 +75,7 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 // 启动服务器
 const PORT = config.port;
 app.listen(PORT, () => {
-  logger.info(`Server started on port ${PORT}`, {
+  logger.info(`Server started on port ${PORT} (v2)`, {
     port: PORT,
     env: config.nodeEnv,
   });
