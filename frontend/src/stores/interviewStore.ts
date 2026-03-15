@@ -46,8 +46,11 @@ export const useInterviewStore = create<InterviewState & InterviewActions>()(
       set({ status: 'loading', error: null });
       
       try {
+        console.log('API_BASE_URL:', API_BASE_URL);
         const token = localStorage.getItem('token') || 'demo-token';
-        const response = await fetch(`${API_BASE_URL}/api/interviews`, {
+        const url = `${API_BASE_URL}/api/interviews`;
+        console.log('Fetching URL:', url);
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
