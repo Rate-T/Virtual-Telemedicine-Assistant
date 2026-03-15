@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { useSettingsStore } from './settingsStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://virtual-telemedicine-assistant-production.up.railway.app';
+// API地址 - 生产环境使用固定地址
+const API_BASE_URL = 'https://virtual-telemedicine-assistant-production.up.railway.app';
 
 export interface Message {
   id: string;
