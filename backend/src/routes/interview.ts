@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { aiService } from '../services/ai.service';
 
 const router = Router();
 
@@ -79,7 +78,7 @@ router.post('/:id/messages', async (req, res) => {
 
   try {
     // 简化处理：直接返回一个基于上下文的回复
-    const _context = interview.messages.slice(-3).map((m: any) => m.content).join(' ');
+    // const context = interview.messages.slice(-3).map((m: any) => m.content).join(' ');
     
     // 根据问题类型生成相关回复
     let reply = '';
