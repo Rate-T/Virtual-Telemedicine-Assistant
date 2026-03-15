@@ -9,6 +9,7 @@ import healthRouter from './routes/health';
 // 导入路由
 import authRouter from './routes/auth';
 import caseRouter from './routes/case';
+// 导入 interview 路由
 import interviewRouter from './routes/interview';
 import aiRouter from './routes/ai';
 
