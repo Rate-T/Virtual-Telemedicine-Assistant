@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://virtual-telemedicine-assistant-production.up.railway.app';
+
 export interface Message {
   id: string;
   role: 'user' | 'patient' | 'system';
@@ -21,20 +23,10 @@ export interface InterviewState {
 interface InterviewActions {
   startInterview: (caseId: string, caseTitle: string) => Promise<void>;
   sendMessage: (content: string) => Promise<void>;
+  submitDiagnosis: (diagnosis: string, basis: string) => Promise<any>;
   setError: (error: string | null) => void;
   reset: () => void;
 }
-
-// 模拟患者回复
-const PATIENT_REPLIES = [
-  '我胸口疼得厉害，像被石头压着一样...',
-  '大概有两个小时了，一开始只是有点闷，现在越来越疼。',
-  '疼的时候向左肩膀和胳膊放射，还出冷汗。',
-  '我有高血压，平时血压控制得不太好。',
-  '我抽烟，一天大概一包。',
-  '没有糖尿病，血脂有点高。',
-  '父亲有冠心病，做过支架手术。',
-];
 
 export const useInterviewStore = create<InterviewState & InterviewActions>()(
   (set, get) => ({
@@ -51,28 +43,42 @@ export const useInterviewStore = create<InterviewState & InterviewActions>()(
     startInterview: async (caseId: string, caseTitle: string) => {
       set({ status: 'loading', error: null });
       
-      // 模拟创建问诊
-      setTimeout(() => {
+      try {
+        const token = localStorage.getItem('token') || 'demo-token';
+        const response = await fetch(`${API_BASE_URL}/api/interviews`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ caseId, mode: 'FREE' }),
+        });
+
+        if (!response.ok) {
+          throw new Error('创建问诊失败');
+        }
+
+        const data = await response.json();
+        
         set({
-          interviewId: `interview-${Date.now()}`,
+          interviewId: data.data.id,
           caseId,
           caseTitle,
-          messages: [
-            {
-              id: `msg-${Date.now()}`,
-              role: 'patient',
-              content: '医生您好，我最近胸口不舒服...',
-              timestamp: Date.now(),
-            },
-          ],
+          messages: data.data.messages.map((m: any) => ({
+            ...m,
+            timestamp: new Date(m.timestamp).getTime(),
+          })),
           status: 'chatting',
           error: null,
         });
-      }, 500);
+      } catch (error) {
+        set({ status: 'idle', error: (error as Error).message });
+      }
     },
 
     sendMessage: async (content: string) => {
-      const { messages } = get();
+      const { interviewId, messages } = get();
+      if (!interviewId) return;
 
       // 添加用户消息
       const userMessage: Message = {
@@ -87,20 +93,63 @@ export const useInterviewStore = create<InterviewState & InterviewActions>()(
         status: 'chatting',
       });
 
-      // 模拟AI回复（带打字效果）
-      setTimeout(() => {
-        const reply = PATIENT_REPLIES[Math.floor(Math.random() * PATIENT_REPLIES.length)];
-        const aiMessage: Message = {
-          id: `msg-${Date.now()}-patient`,
-          role: 'patient',
-          content: reply,
-          timestamp: Date.now(),
-        };
+      try {
+        const token = localStorage.getItem('token') || 'demo-token';
+        const response = await fetch(`${API_BASE_URL}/api/interviews/${interviewId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ content }),
+        });
+
+        if (!response.ok) {
+          throw new Error('发送消息失败');
+        }
+
+        const data = await response.json();
+        
         set({
-          messages: [...get().messages, aiMessage],
+          messages: [...get().messages, {
+            id: data.data.message.id,
+            role: data.data.message.role,
+            content: data.data.message.content,
+            timestamp: new Date(data.data.message.timestamp).getTime(),
+          }],
           status: 'chatting',
         });
-      }, 1000);
+      } catch (error) {
+        set({ error: (error as Error).message });
+      }
+    },
+
+    submitDiagnosis: async (diagnosis: string, basis: string) => {
+      const { interviewId } = get();
+      if (!interviewId) return;
+
+      try {
+        const token = localStorage.getItem('token') || 'demo-token';
+        const response = await fetch(`${API_BASE_URL}/api/interviews/${interviewId}/diagnosis`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ diagnosis, diagnosisBasis: basis }),
+        });
+
+        if (!response.ok) {
+          throw new Error('提交诊断失败');
+        }
+
+        const data = await response.json();
+        set({ status: 'completed' });
+        return data.data;
+      } catch (error) {
+        set({ error: (error as Error).message });
+        return null;
+      }
     },
 
     setError: (error: string | null) => set({ error }),
