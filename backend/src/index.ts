@@ -40,8 +40,11 @@ app.use('/api/auth', authRouter);
 app.use('/api/cases', caseRouter);
 
 // API路由 - interview
-console.log('Interview router loaded successfully');
-app.use('/api/interviews', interviewRouter);
+console.log('Loading interview router...');
+app.use('/api/interviews', (req, res, next) => {
+  console.log('Interview route hit:', req.method, req.path);
+  interviewRouter(req, res, next);
+});
 
 app.use('/api/ai', aiRouter);
 
