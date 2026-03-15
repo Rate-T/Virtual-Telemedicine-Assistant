@@ -10,6 +10,7 @@ import healthRouter from './routes/health';
 import authRouter from './routes/auth';
 import caseRouter from './routes/case';
 import interviewRouter from './routes/interview';
+import aiRouter from './routes/ai';
 
 const app = express();
 
@@ -37,6 +38,7 @@ app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/cases', caseRouter);
 app.use('/api/interviews', interviewRouter);
+app.use('/api/ai', aiRouter);
 
 // 根路由
 app.get('/', (_req, res) => {
