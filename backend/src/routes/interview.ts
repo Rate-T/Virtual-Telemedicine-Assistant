@@ -47,6 +47,17 @@ const casesData: Map<string, CaseData> = new Map([
   }],
 ]);
 
+// 获取所有问诊（调试用）
+router.get('/', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      message: 'Interview API is working',
+      count: interviews.size,
+    },
+  });
+});
+
 // 创建问诊
 router.post('/', async (req, res) => {
   const { caseId, mode = 'FREE' } = req.body;
