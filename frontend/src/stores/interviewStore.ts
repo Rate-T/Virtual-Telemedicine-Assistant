@@ -60,7 +60,9 @@ export const useInterviewStore = create<InterviewState & InterviewActions>()(
         });
 
         if (!response.ok) {
-          throw new Error('创建问诊失败');
+          const errorText = await response.text();
+          console.error('Response error:', response.status, errorText);
+          throw new Error(`创建问诊失败: ${response.status} ${errorText}`);
         }
 
         const data = await response.json();
