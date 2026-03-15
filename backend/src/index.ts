@@ -49,6 +49,27 @@ app.get('/', (_req, res) => {
   });
 });
 
+// 调试路由 - 列出dist目录内容
+import fs from 'fs';
+import path from 'path';
+app.get('/debug/files', (_req, res) => {
+  try {
+    const distPath = path.join(__dirname, '..', 'dist');
+    const routesPath = path.join(distPath, 'routes');
+    
+    const files = {
+      distExists: fs.existsSync(distPath),
+      routesExists: fs.existsSync(routesPath),
+      distFiles: fs.existsSync(distPath) ? fs.readdirSync(distPath) : [],
+      routesFiles: fs.existsSync(routesPath) ? fs.readdirSync(routesPath) : [],
+    };
+    
+    res.json({ success: true, data: files });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
 // 404处理
 app.use((_req, res) => {
   res.status(404).json({
