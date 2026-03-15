@@ -48,7 +48,7 @@ const casesData: Map<string, CaseData> = new Map([
 ]);
 
 // 获取所有问诊（调试用）
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   res.json({
     success: true,
     data: {
