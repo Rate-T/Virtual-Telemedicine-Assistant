@@ -41,10 +41,15 @@ app.use('/api/cases', caseRouter);
 
 // API路由 - interview
 console.log('Loading interview router...');
-app.use('/api/interviews', (req, res, next) => {
-  console.log('Interview route hit:', req.method, req.path);
-  interviewRouter(req, res, next);
+
+// 测试POST端点
+app.post('/api/interviews', (req, res) => {
+  console.log('Direct POST /api/interviews hit');
+  res.json({ success: true, message: 'POST works' });
 });
+
+// 其他interview路由
+app.use('/api/interviews', interviewRouter);
 
 app.use('/api/ai', aiRouter);
 
