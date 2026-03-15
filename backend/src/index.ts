@@ -41,8 +41,6 @@ app.use('/api/cases', caseRouter);
 
 // API路由 - interview
 console.log('Interview router loaded successfully');
-app.use('/api/interviews/', interviewRouter);
-// 兼容不带斜杠的访问
 app.use('/api/interviews', interviewRouter);
 
 app.use('/api/ai', aiRouter);
