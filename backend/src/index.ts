@@ -38,7 +38,12 @@ app.use('/api/health', healthRouter);
 // API路由
 app.use('/api/auth', authRouter);
 app.use('/api/cases', caseRouter);
+
+// 调试：检查interviewRouter
+console.log('Interview router type:', typeof interviewRouter);
+console.log('Interview router:', interviewRouter);
 app.use('/api/interviews', interviewRouter);
+
 app.use('/api/ai', aiRouter);
 
 // 根路由
