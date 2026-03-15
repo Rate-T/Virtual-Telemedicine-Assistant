@@ -58,6 +58,30 @@ app.get('/debug/files', (_req, res) => {
     const distPath = path.join(__dirname, '..', 'dist');
     const routesPath = path.join(distPath, 'routes');
     
+    // 读取index.js内容，检查是否包含interview
+    const indexPath = path.join(distPath, 'index.js');
+    const indexContent = fs.existsSync(indexPath) ? fs.readFileSync(indexPath, 'utf8') : '';
+    const hasInterview = indexContent.includes('interview');
+    
+    const files = {
+      distExists: fs.existsSync(distPath),
+      routesExists: fs.existsSync(routesPath),
+      indexHasInterview: hasInterview,
+      indexContentPreview: indexContent.substring(0, 2000),
+    };
+    
+    res.json({ success: true, data: files });
+  } catch (error) {
+    res.status(500).json({ success: false, error: (error as Error).message });
+  }
+});
+
+// 旧版调试路由
+app.get('/debug/files-old', (_req, res) => {
+  try {
+    const distPath = path.join(__dirname, '..', 'dist');
+    const routesPath = path.join(distPath, 'routes');
+    
     const files = {
       distExists: fs.existsSync(distPath),
       routesExists: fs.existsSync(routesPath),
