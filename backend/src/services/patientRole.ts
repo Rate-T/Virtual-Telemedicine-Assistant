@@ -66,7 +66,7 @@ ${caseData.diagnosis}
 export function generateContextualReply(
   question: string,
   caseData: CaseData,
-  conversationHistory: string[]
+  _conversationHistory: string[]
 ): string {
   const q = question.toLowerCase();
   
