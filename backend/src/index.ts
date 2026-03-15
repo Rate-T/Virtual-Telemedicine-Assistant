@@ -39,9 +39,10 @@ app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/cases', caseRouter);
 
-// 调试：检查interviewRouter
-console.log('Interview router type:', typeof interviewRouter);
-console.log('Interview router:', interviewRouter);
+// API路由 - interview
+console.log('Interview router loaded successfully');
+app.use('/api/interviews/', interviewRouter);
+// 兼容不带斜杠的访问
 app.use('/api/interviews', interviewRouter);
 
 app.use('/api/ai', aiRouter);
