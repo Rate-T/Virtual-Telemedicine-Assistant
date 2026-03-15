@@ -88,9 +88,10 @@ const InterviewChat: React.FC = () => {
   // 提交诊断
   const handleSubmitDiagnosis = async (values: any) => {
     try {
+      const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://virtual-telemedicine-assistant-production.up.railway.app';
       const token = localStorage.getItem('token') || 'demo-token';
       const response = await fetch(
-        `http://localhost:3000/api/interviews/${interviewId}/diagnosis`,
+        `${API_BASE_URL}/api/interviews/${interviewId}/diagnosis`,
         {
           method: 'POST',
           headers: {
