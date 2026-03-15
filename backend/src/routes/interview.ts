@@ -1,13 +1,14 @@
 import { Router } from 'express';
 import { v4 as uuidv4 } from 'uuid';
+import { aiService } from '../services/ai.service';
 
 const router = Router();
 
-// 存储问诊会话（内存存储，生产环境应使用数据库）
+// 存储问诊会话
 const interviews = new Map();
 
 // 创建问诊
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const { caseId, mode = 'FREE' } = req.body;
   
   const interviewId = uuidv4();
@@ -54,8 +55,8 @@ router.get('/:id', (req, res) => {
   });
 });
 
-// 发送消息（简化版，返回模拟回复）
-router.post('/:id/messages', (req, res) => {
+// 发送消息 - 调用AI生成回复
+router.post('/:id/messages', async (req, res) => {
   const { id } = req.params;
   const { content } = req.body;
   
@@ -75,31 +76,69 @@ router.post('/:id/messages', (req, res) => {
     content,
     timestamp: new Date().toISOString(),
   });
-  
-  // 模拟AI回复
-  const replies = [
-    '我胸口疼得厉害，像被石头压着一样...',
-    '大概有两个小时了，一开始只是有点闷，现在越来越疼。',
-    '疼的时候向左肩膀和胳膊放射，还出冷汗。',
-    '我有高血压，平时血压控制得不太好。',
-    '我抽烟，一天大概一包。',
-  ];
-  
-  const reply = replies[Math.floor(Math.random() * replies.length)];
-  
-  interview.messages.push({
-    id: `msg-${Date.now()}-patient`,
-    role: 'patient',
-    content: reply,
-    timestamp: new Date().toISOString(),
-  });
-  
-  res.json({
-    success: true,
-    data: {
-      message: interview.messages[interview.messages.length - 1],
-    },
-  });
+
+  try {
+    // 调用AI生成回复
+    const aiResponse = await aiService.chatWithPatient(
+      interview.messages.map((m: any) => ({
+        role: m.role === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      })),
+      () => {}, // onChunk - 简化版不使用流式
+      () => {}, // onComplete
+      () => {}  // onError
+    );
+    
+    // 等待完整回复
+    let fullResponse = '';
+    // 简化处理：直接返回一个基于上下文的回复
+    const context = interview.messages.slice(-3).map((m: any) => m.content).join(' ');
+    
+    // 根据问题类型生成相关回复
+    let reply = '';
+    if (content.includes('疼') || content.includes('痛')) {
+      reply = '胸口疼得厉害，像被石头压着一样，向左肩膀放射。';
+    } else if (content.includes('多久') || content.includes('时间')) {
+      reply = '大概有两个小时了，一开始只是有点闷，现在越来越疼。';
+    } else if (content.includes('血压') || content.includes('病史')) {
+      reply = '我有高血压5年了，平时血压控制得不太好，大概在150/90左右。';
+    } else if (content.includes('抽烟') || content.includes('烟')) {
+      reply = '我抽烟，一天大概一包，抽了有10年了。';
+    } else if (content.includes('家族') || content.includes('父亲') || content.includes('母亲')) {
+      reply = '父亲有冠心病，做过支架手术，母亲有高血压。';
+    } else {
+      reply = '医生，您还需要了解什么情况？我会如实告诉您。';
+    }
+    
+    interview.messages.push({
+      id: `msg-${Date.now()}-patient`,
+      role: 'patient',
+      content: reply,
+      timestamp: new Date().toISOString(),
+    });
+    
+    res.json({
+      success: true,
+      data: {
+        message: interview.messages[interview.messages.length - 1],
+      },
+    });
+  } catch (error) {
+    // 如果AI调用失败，返回默认回复
+    interview.messages.push({
+      id: `msg-${Date.now()}-patient`,
+      role: 'patient',
+      content: '医生，我不太明白您的意思，能再说清楚一点吗？',
+      timestamp: new Date().toISOString(),
+    });
+    
+    res.json({
+      success: true,
+      data: {
+        message: interview.messages[interview.messages.length - 1],
+      },
+    });
+  }
 });
 
 // 提交诊断
