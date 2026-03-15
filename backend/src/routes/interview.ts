@@ -78,21 +78,8 @@ router.post('/:id/messages', async (req, res) => {
   });
 
   try {
-    // 调用AI生成回复
-    const aiResponse = await aiService.chatWithPatient(
-      interview.messages.map((m: any) => ({
-        role: m.role === 'user' ? 'user' : 'assistant',
-        content: m.content,
-      })),
-      () => {}, // onChunk - 简化版不使用流式
-      () => {}, // onComplete
-      () => {}  // onError
-    );
-    
-    // 等待完整回复
-    let fullResponse = '';
     // 简化处理：直接返回一个基于上下文的回复
-    const context = interview.messages.slice(-3).map((m: any) => m.content).join(' ');
+    const _context = interview.messages.slice(-3).map((m: any) => m.content).join(' ');
     
     // 根据问题类型生成相关回复
     let reply = '';
